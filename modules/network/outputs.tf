@@ -1,0 +1,15 @@
+output "vpc_id" {
+  value = module.vpc.vpc_id
+}
+
+output "public_subnet_ids" {
+  value = module.vpc.public_subnets
+}
+
+output "app_subnet_ids" {
+  value = module.vpc.private_subnets
+}
+
+output "db_subnet_ids" {
+  value = module.vpc.database_subnets
+}
