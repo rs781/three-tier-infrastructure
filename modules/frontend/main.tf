@@ -33,6 +33,23 @@ resource "aws_cloudfront_distribution" "frontend" {
     origin_access_control_id = aws_cloudfront_origin_access_control.frontend.id
   }
 
+  # Backend ALB has no HTTPS listener (no domain/cert in dev), so the
+  # browser can't call it directly from an HTTPS page - fetches over
+  # http:// get blocked as mixed content. Proxying API paths through
+  # CloudFront keeps the browser on HTTPS end-to-end; CloudFront -> ALB
+  # over plain HTTP is fine since that leg never touches the browser.
+  origin {
+    domain_name = var.alb_dns_name
+    origin_id   = "alb-backend"
+
+    custom_origin_config {
+      http_port              = 80
+      https_port             = 443
+      origin_protocol_policy = "http-only"
+      origin_ssl_protocols   = ["TLSv1.2"]
+    }
+  }
+
   default_cache_behavior {
     allowed_methods        = ["GET", "HEAD"]
     cached_methods         = ["GET", "HEAD"]
@@ -43,6 +60,30 @@ resource "aws_cloudfront_distribution" "frontend" {
       query_string = false
       cookies {
         forward = "none"
+      }
+    }
+  }
+
+  dynamic "ordered_cache_behavior" {
+    for_each = ["/posts*", "/tools*", "/auth/*", "/health"]
+    content {
+      path_pattern           = ordered_cache_behavior.value
+      allowed_methods        = ["GET", "HEAD", "OPTIONS", "PUT", "POST", "PATCH", "DELETE"]
+      cached_methods         = ["GET", "HEAD"]
+      target_origin_id       = "alb-backend"
+      viewer_protocol_policy = "redirect-to-https"
+
+      # API responses are per-request and auth-sensitive; never cache them.
+      min_ttl     = 0
+      default_ttl = 0
+      max_ttl     = 0
+
+      forwarded_values {
+        query_string = true
+        headers      = ["Authorization", "Content-Type"]
+        cookies {
+          forward = "none"
+        }
       }
     }
   }

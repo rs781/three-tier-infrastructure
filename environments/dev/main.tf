@@ -73,7 +73,8 @@ resource "aws_security_group_rule" "db_from_ecs_tasks" {
 module "frontend" {
   source = "./modules/frontend"
 
-  name_prefix = var.name_prefix
+  name_prefix  = var.name_prefix
+  alb_dns_name = module.ecs.alb_dns_name
 }
 # module "github_oidc" {
 #   source = "./modules/github-oidc"
