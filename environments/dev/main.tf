@@ -76,23 +76,24 @@ module "frontend" {
   name_prefix  = var.name_prefix
   alb_dns_name = module.ecs.alb_dns_name
 }
-# module "github_oidc" {
-#   source = "./modules/github-oidc"
 
-#   name_prefix = var.name_prefix
+module "github_oidc" {
+  source = "./modules/github-oidc"
 
-#   github_org         = var.github_org
-#   backend_repo_name  = var.backend_repo_name
-#   frontend_repo_name = var.frontend_repo_name
-#   deploy_branch      = var.deploy_branch
+  name_prefix = var.name_prefix
 
-#   ecr_repository_arn = module.ecs.ecr_repository_arn
-#   ecs_cluster_arn    = module.ecs.ecs_cluster_arn
-#   ecs_service_arn    = module.ecs.ecs_service_arn
+  github_org         = var.github_org
+  backend_repo_name  = var.backend_repo_name
+  frontend_repo_name = var.frontend_repo_name
+  deploy_branch      = var.deploy_branch
 
-#   task_execution_role_arn = module.ecs.task_execution_role_arn
-#   task_role_arn           = module.ecs.task_role_arn
+  ecr_repository_arn = module.ecs.ecr_repository_arn
+  ecs_cluster_arn    = module.ecs.ecs_cluster_arn
+  ecs_service_arn    = module.ecs.ecs_service_arn
 
-#   frontend_bucket_arn         = module.frontend.bucket_arn
-#   cloudfront_distribution_arn = module.frontend.cloudfront_distribution_arn
-# }
+  task_execution_role_arn = module.ecs.task_execution_role_arn
+  task_role_arn           = module.ecs.task_role_arn
+
+  frontend_bucket_arn         = module.frontend.bucket_arn
+  cloudfront_distribution_arn = module.frontend.cloudfront_distribution_arn
+}

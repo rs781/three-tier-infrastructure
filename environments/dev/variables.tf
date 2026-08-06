@@ -45,7 +45,7 @@ variable "db_instance_class" {
 }
 variable "github_org" {
   type    = string
-  default = "IITC-College"
+  default = "rs781"
 }
 
 variable "backend_repo_name" {
